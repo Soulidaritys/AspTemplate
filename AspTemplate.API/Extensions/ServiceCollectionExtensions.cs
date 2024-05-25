@@ -1,9 +1,8 @@
-﻿using AspTemplate.Application.Services;
+﻿using System.Security.Claims;
+using AspTemplate.Application.Services;
 using AspTemplate.Core.Enums;
 using AspTemplate.Core.Interfaces.Services;
 using AspTemplate.Infrastructure.Authentication;
-using Mapster;
-using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +10,8 @@ using System.Text;
 using AspTemplate.API.ProblemDetails;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AspTemplate.Core.Interfaces.Repositories;
+using AspTemplate.Core.Models;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
@@ -77,11 +78,30 @@ public static class ServiceCollectionExtensions
                         context.Token = context.Request.Cookies["secretCookie"];
 
                         return Task.CompletedTask;
-                    }
+                    },
+
+                    OnTokenValidated = async (context) =>
+                    {
+                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUsersRepository>();
+                        if(!Guid.TryParse(context.Principal?.FindFirstValue(CustomClaims.UserId), out var userIdGuid))
+                        {
+                            context.Fail("Unauthorized");
+                            return;
+                        }
+
+                        var user = await userService.GetUserJwtValidateDto(new UserId(userIdGuid));
+                        if (user == null)
+                        {
+                            context.Fail("Unauthorized");
+                            return;
+                        }
+
+                        if (context.Principal.FindFirstValue(CustomClaims.SecurityStamp) != user.SecurityStamp)
+                            context.Fail("Unauthorized");
+                    },
                 };
             });
 
-        services.AddScoped<IPermissionService, PermissionService>();
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         services.AddAuthorization(options =>
@@ -104,33 +124,6 @@ public static class ServiceCollectionExtensions
                 policy.RequireRole(Role.ConsumerUser.ToString());
             });
         });
-
-        return services;
-    }
-
-    public static IServiceCollection AddMapster(this IServiceCollection services)
-    {
-        var config = TypeAdapterConfig.GlobalSettings;
-        config.Default.EnableNonPublicMembers(true);
-        config.Default.EnumMappingStrategy(EnumMappingStrategy.ByValue);
-        //#if DEBUG
-        //        config.Compiler =
-        //            exp => exp.CompileWithDebugInfo(new ExpressionCompilationOptions
-        //            {
-        //                ThrowOnFailedCompilation = true,
-        //            });
-        //#endif
-
-        var scanResult = config.Scan(
-            typeof(API.AssemblyMarker).Assembly,
-            typeof(Persistence.AssemblyMarker).Assembly,
-            typeof(Application.AssemblyMarker).Assembly
-        );
-        config.Apply(scanResult);
-        config.Compile();
-
-        services.AddSingleton(config);
-        services.AddScoped<IMapper, ServiceMapper>();
 
         return services;
     }

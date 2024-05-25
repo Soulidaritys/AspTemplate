@@ -18,10 +18,11 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
         List<Claim> claims =
         [
             new Claim(CustomClaims.UserId, user.Id.ToString()),
+            new Claim(CustomClaims.SecurityStamp, user.SecurityStamp),
         ];
 
         if(user.Roles is not null) 
-            claims.AddRange(user.Roles.Select(role => new Claim(CustomClaims.Roles, role.ToString())));
+            claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.ToString())));
 
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),

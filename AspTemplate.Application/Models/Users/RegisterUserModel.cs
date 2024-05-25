@@ -4,16 +4,7 @@ namespace AspTemplate.Application.Models.Users;
 
 public class RegisterUserModel
 {
-    private RegisterUserModel() { }
-
-    public string Email { get; private set; }
-    public string UserName { get; private set; }
-    public string Password { get; private set; }
-    public string? FirstName { get; private set; }
-    public string? LastName { get; private set; }
-    public IReadOnlyCollection<Role> Roles { get; private set; }
-
-    public static RegisterUserModel Create(
+    public RegisterUserModel(
         string email,
         string userName,
         string password,
@@ -21,16 +12,18 @@ public class RegisterUserModel
         string? firstName,
         string? lastName)
     {
-        var user = new RegisterUserModel
-        {
-            Email = email,
-            UserName = userName,
-            Password = password,
-            Roles = roles,
-            FirstName = firstName,
-            LastName = lastName,
-        };
-
-        return user;
+        Email = email;
+        UserName = userName;
+        Password = password;
+        Roles = roles;
+        FirstName = firstName;
+        LastName = lastName;
     }
+
+    public string Email { get; private set; }
+    public string UserName { get; private set; }
+    public string Password { get; private set; }
+    public string? FirstName { get; private set; }
+    public string? LastName { get; private set; }
+    public IReadOnlyCollection<Role> Roles { get; private set; }
 }

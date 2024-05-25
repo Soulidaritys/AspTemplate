@@ -22,11 +22,4 @@
   <ItemGroup>
     <ProjectReference Include="..\AspTemplate.Application\AspTemplate.Application.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-    <Folder Include="Models\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

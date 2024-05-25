@@ -1,26 +1,27 @@
-﻿using AspTemplate.Core.Enums;
+﻿using AspTemplate.Application.Dto;
+using AspTemplate.Core.Enums;
 using AspTemplate.Core.Interfaces.Repositories;
 using AspTemplate.Core.Models;
-using AspTemplate.Persistence.Entities;
-using Mapster;
-using MapsterMapper;
+using AspTemplate.Persistence.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspTemplate.Persistence.Repositories;
 public class UsersRepository : IUsersRepository
 {
     private readonly AppDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly UserMapper _userMapper;
 
-    public UsersRepository(AppDbContext context, IMapper mapper)
+    public UsersRepository(
+        AppDbContext context, 
+        UserMapper userMapper)
     {
         _context = context;
-        _mapper = mapper;
+        _userMapper = userMapper;
     }
 
     public async Task Add(User user)
     {
-        var userEntity = _mapper.Map<UserEntity>(user);
+        var userEntity = _userMapper.ToEntity(user);
 
         foreach (var roleEntity in userEntity.Roles)
             _context.Roles.Attach(roleEntity);
@@ -30,22 +31,31 @@ public class UsersRepository : IUsersRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<T?> GetByEmail<T>(string email)
+    public async Task<User?> GetByEmail(string email)
     {
-        //var m = await _context.Users
-        //    .Include(x => x.Roles)
-        //    .Include(x => x.MediaCollection)
-        //    .Include(x => x.UserProfile)
-        //    .Where(x => x.Email == email)
-        //    .FirstOrDefaultAsync();
-
         var user = await _context.Users
             .AsNoTracking()
+            .Include(x => x.Roles)
+            .AsNoTracking()
             .Where(u => u.Email == email)
-            .ProjectToType<T>()
             .FirstOrDefaultAsync();
 
-        return user;
+        return user == null ? null : _userMapper.ToDomain(user);
+    }
+
+    public Task<UserJwtValidateDto?> GetUserJwtValidateDto(UserId userId)
+    {
+        return _context.Users
+            .AsNoTracking()
+            .Include(u => u.Roles)
+            .ThenInclude(r => r.Permissions)
+            .Where(u => u.Id == userId.Value)
+            .Select(u => new UserJwtValidateDto
+            {
+                UserId = new UserId(u.Id),
+                SecurityStamp = u.SecurityStamp,
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<HashSet<Permission>> GetUserPermissions(Guid userId)

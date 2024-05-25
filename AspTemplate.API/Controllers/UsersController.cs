@@ -1,8 +1,8 @@
 ﻿using AspTemplate.API.Contracts.Users;
 using AspTemplate.Application.Models.Users;
 using AspTemplate.Core.Interfaces.Services;
+using AspTemplate.Core.Models;
 using AspTemplate.Infrastructure.Authentication;
-using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,10 +18,9 @@ public sealed class UsersController : ControllerBase
 	[AllowAnonymous]
 	public async Task<IActionResult> Register(
 		[FromBody] RegisterUserRequest request,
-		[FromServices] IMapper mapper,
 		IUserService usersService)
 	{
-		var registerUserModel = mapper.Map<RegisterUserModel>(request);
+		var registerUserModel = request.ToModel();
 		await usersService.Register(registerUserModel);
         return Ok();
     }
@@ -45,6 +44,8 @@ public sealed class UsersController : ControllerBase
         [FromQuery] string email,
         IUserService usersService)
     {
+		var currentUserId = 
+            new UserId(Guid.Parse(HttpContext.User.Claims.FirstOrDefault(x => x.Type == CustomClaims.UserId)?.Value));
         var user = await usersService.GetUserByEmail(email);
         return Ok(user);
     }

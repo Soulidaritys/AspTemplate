@@ -1,5 +1,5 @@
 using System.Net;
-using AspTemplate.Persistence;
+using AspTemplate.Persistence.Extensions;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;

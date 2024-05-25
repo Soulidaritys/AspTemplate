@@ -33,7 +33,7 @@ public class UserService : IUserService
 
     public async Task Register(RegisterUserModel registerUserModel)
     {
-        var userByEmail = await _usersRepository.GetByEmail<User>(registerUserModel.Email);
+        var userByEmail = await _usersRepository.GetByEmail(registerUserModel.Email);
         if (userByEmail != null)
             throw ErrorCodes.UserWithEmailAlreadyExists.ToException();
 
@@ -41,23 +41,18 @@ public class UserService : IUserService
 
         var userId = new UserId(Guid.NewGuid());
 
-        var userProfile = new UserProfile(
-            userId,
-            registerUserModel.FirstName, 
-            registerUserModel.LastName,
-            _avatarMedia
-        );
-
         var user = new User(
             new UserId(Guid.NewGuid()),
             registerUserModel.UserName,
             hashedPassword,
             registerUserModel.Email,
-            userProfile,
-            registerUserModel.Roles,
-            null,
+            GenerateSecurityStamp(),
+            registerUserModel.FirstName,
+            registerUserModel.LastName,
             DateTimeOffset.UtcNow,
-            updatedAt: null
+            null,
+            registerUserModel.Roles,
+            null
         );
 
         await _usersRepository.Add(user);
@@ -65,7 +60,7 @@ public class UserService : IUserService
 
     public async Task<AppAuthToken> Login(string email, string password)
     {
-        var user = await _usersRepository.GetByEmail<User>(email);
+        var user = await _usersRepository.GetByEmail(email);
         if (user == null)
             throw ErrorCodes.UserNotFound.ToException();
 
@@ -80,7 +75,7 @@ public class UserService : IUserService
 
     public async Task<User> GetUserByEmail(string email)
     {
-        var user = await _usersRepository.GetByEmail<User>(email);
+        var user = await _usersRepository.GetByEmail(email);
         if (user == null)
             throw ErrorCodes.UserNotFound.ToException();
 
@@ -132,7 +127,7 @@ public class UserService : IUserService
     {
         return new List<RegisterUserModel>
         {
-            RegisterUserModel.Create(
+            new RegisterUserModel(
                 "admin@gmail.com",
                 "administrator",
                 "password",
@@ -141,7 +136,7 @@ public class UserService : IUserService
                 "Adminovich"
             ),
 
-            RegisterUserModel.Create(
+            new RegisterUserModel(
                 "consumer1@gmail.com",
                 "consumer1337",
                 "password",
@@ -150,5 +145,10 @@ public class UserService : IUserService
                 "Comsumerovich"
             ),
         };
+    }
+
+    private string GenerateSecurityStamp()
+    {
+        return Guid.NewGuid().ToString();
     }
 }

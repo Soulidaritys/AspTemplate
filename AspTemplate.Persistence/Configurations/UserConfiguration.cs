@@ -41,20 +41,6 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
     }
 }
 
-public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfileEntity>
-{
-    public void Configure(EntityTypeBuilder<UserProfileEntity> builder)
-    {
-        builder.HasKey(up => up.UserId);
-
-        builder.HasOne(up => up.User)
-            .WithOne(u => u.UserProfile)
-            .HasForeignKey<UserProfileEntity>(up => up.UserId);
-
-        //builder.Property(x => x.UserToMediaEntities)
-    }
-}
-
 public class MediaConfiguration : IEntityTypeConfiguration<MediaEntity>
 {
     public void Configure(EntityTypeBuilder<MediaEntity> builder)
@@ -89,16 +75,5 @@ public partial class UserMediaConfiguration
     {
         builder.HasKey(r => new { r.ObjectKey, r.UserId });
 
-        builder.HasOne(x => x.User)
-            .WithMany(x => x.UserToMediaChains)
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_CT_UM_1");
-
-        builder.HasOne(x => x.Media)
-            .WithMany(x => x.UserToMediaChains)
-            .HasForeignKey(x => x.ObjectKey)
-            .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_CT_UM_2");
     }
 }

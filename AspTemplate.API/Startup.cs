@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Sstv.DomainExceptions.Extensions.DependencyInjection;
 using AspTemplate.API.ProblemDetails;
 using AspTemplate.API.Swagger;
+using AspTemplate.Persistence.Extensions;
 
 namespace AspTemplate.API;
 
@@ -23,7 +24,6 @@ public class Startup(IConfiguration configuration)
             .Configure<AuthorizationOptions>(_configuration.GetSection(nameof(AuthorizationOptions)));
 
         services.AddSwagger();
-        services.AddMapster();
 
         services
             .AddApiControllers()

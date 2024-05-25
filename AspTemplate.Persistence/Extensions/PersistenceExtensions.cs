@@ -2,13 +2,14 @@
 using System.Text.Json;
 using AspTemplate.Core.Interfaces.Repositories;
 using AspTemplate.Core.Interfaces.Services;
+using AspTemplate.Persistence.Mappings;
 using AspTemplate.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AspTemplate.Persistence;
+namespace AspTemplate.Persistence.Extensions;
 public static class PersistenceExtensions
 {
     public static IServiceCollection AddPersistence(
@@ -22,6 +23,7 @@ public static class PersistenceExtensions
             options.EnableDetailedErrors();
         });
 
+        services.AddMappings();
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
 
@@ -60,5 +62,13 @@ public static class PersistenceExtensions
             logger?.LogError(ex, "An error occured while applying migrations");
             throw;
         }
+    }
+
+    private static IServiceCollection AddMappings(this IServiceCollection services)
+    {
+        services.AddScoped<UserMapper>();
+        services.AddScoped<MediaMapper>();
+
+        return services;
     }
 }

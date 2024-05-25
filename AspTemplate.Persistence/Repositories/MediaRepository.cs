@@ -1,30 +1,27 @@
 ﻿using AspTemplate.Core.Interfaces.Repositories;
 using AspTemplate.Core.Models;
 using AspTemplate.Persistence.Entities;
-using MapsterMapper;
-using Microsoft.EntityFrameworkCore;
+using AspTemplate.Persistence.Mappings;
 
 namespace AspTemplate.Persistence.Repositories;
 
 public class MediaRepository : IMediaRepository
 {
     private readonly AppDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly MediaMapper _mediaMapper;
 
     public MediaRepository(
         AppDbContext dbContext,
-        IMapper mapper)
+        MediaMapper mediaMapper)
     {
         _dbContext = dbContext;
-        _mapper = mapper;
+        _mediaMapper = mediaMapper;
     }
 
     public async Task Add(Media media)
     {
-        var userEntity = _mapper.Map<MediaEntity>(media);
-        
-        _ = await _dbContext.Media.AddAsync(userEntity);
-
+        var mediaEntity = _mediaMapper.ToEntity(media);
+        _ = await _dbContext.Media.AddAsync(mediaEntity);
         await _dbContext.SaveChangesAsync();
     }
 }

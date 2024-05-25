@@ -18,6 +18,7 @@ public static class ErrorCodeMapping
         [ErrorCodes.InvalidData] = StatusCodes.Status400BadRequest,
         [ErrorCodes.InvalidEmail] = StatusCodes.Status400BadRequest,
         [ErrorCodes.UserUndefined] = StatusCodes.Status400BadRequest,
+        
         [ErrorCodes.UserNotFound] = StatusCodes.Status404NotFound,
 
         // 5xx

@@ -11,25 +11,17 @@ public class UserEntity
     public string PasswordHash { get; set; } = string.Empty;
     public string SecurityStamp { get; set; } = string.Empty;
 
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+
+
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     
-    public UserProfileEntity? UserProfile { get; set; }
     public ICollection<RoleEntity> Roles { get; set; } = [];
     public ICollection<MediaEntity> MediaCollection { get; set; } = [];
     
     public ICollection<UserMediaEntity> UserToMediaChains { get; set; } = [];
-}
-
-public class UserProfileEntity
-{
-    public Guid UserId { get; set; }
-    public UserEntity? User { get; set; }
-
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-
-    public DateTimeOffset? UpdatedAt { get; set; }
 }
 
 public class UserMediaEntity

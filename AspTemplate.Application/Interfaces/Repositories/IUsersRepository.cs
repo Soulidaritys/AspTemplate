@@ -1,11 +1,13 @@
-﻿using AspTemplate.Core.Enums;
+﻿using AspTemplate.Application.Dto;
+using AspTemplate.Core.Enums;
 using AspTemplate.Core.Models;
 
 namespace AspTemplate.Core.Interfaces.Repositories;
 public interface IUsersRepository
 {
     Task Add(User user);
-    Task<T?> GetByEmail<T>(string email);
+    Task<User?> GetByEmail(string email);
+    Task<UserJwtValidateDto?> GetUserJwtValidateDto(UserId userId);
     Task<HashSet<Permission>> GetUserPermissions(Guid userId);
 }
 
